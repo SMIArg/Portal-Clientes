@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    /* Estilos Generales Modernos y Profesionales */
+    body {
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #F0F1FF; 
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    /* Secciones de Pantalla */
+    .view-section {
+      display: none;
+    }
+    
+    /* Vista de login: Contenedor de pantalla dividida al 100% */
+    #loginView.active-view {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #ffffff;
+      z-index: 1000;
+    }
+    .active-view {
+      display: block;
+    }
+    
+    /* MODIFICADO: Panel izquierdo sutilmente más chico (45%) */
+    .login-photo-panel {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 45%;
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    /* Texto de marca en la esquina superior izquierda sobre las fotos */
+    .brand-logo-left {
+      position: absolute;
+      top: 40px;
+      left: 40px;
+      z-index: 10;
+      color: #ffffff;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Capas para el difuminado de fotos de fondo */
+    .login-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      transition: opacity 1.5s ease-in-out;
+      z-index: 1;
+    }
+    /* Filtro oscuro superior para dar contraste */
+    .login-bg::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(2, 4, 61, 0.45); 
+    }
+    
+    /* MODIFICADO: Panel derecho adaptado al 55% restante */
+    .login-form-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 55%;
+      height: 100%;
+      background-color: #ffffff;
+      display: table;
+    }
+    .login-form-wrapper {
+      display: table-cell;
+      vertical-align: middle;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    /* Tarjeta de Login */
+    .login-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 45px;
+      border: 1px solid #e2e8f0; 
+      border-radius: 6px;
+      text-align: left;
+    }
+    .login-card h2 {
+      margin-top: 0;
+      color: #4a5568; 
+      text-align: center;
+      margin-bottom: 35px;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      color: #4a5568;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #032463;
+    }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background-color: #032463;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+      margin-top: 15px;
+      letter-spacing: 0.5px;
+      transition: background-color 0.2s;
+    }
+    .btn:hover {
+      background-color: #1e3a8a;
+    }
+    .error-msg {
+      color: #c0392b;
+      font-size: 14px;
+      margin-top: 15px;
+      text-align: center;
+      display: none;
+    }
+    
+    /* Marca de Agua Centrada debajo del botón */
+    .watermark {
+      margin-top: 35px; 
+      text-align: center; 
+      font-size: 11px;
+      color: #94a3b8; 
+      line-height: 1.6;
+    }
+    .watermark strong {
+      color: #032463; 
+      font-size: 14px;
+      display: block;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Adaptación Responsiva para Celulares */
+    @media(max-width: 768px){
+      .login-photo-panel {
+        display: none; 
+      }
+      .login-form-panel {
+        width: 100%; 
+      }
+      .info-item { 
+        width: 100%; 
+      }
+    }
+    
+    /* Estilos Dashboard Interno */
+    .header-panel {
+      background: #032463;
+      color: white;
+      padding: 20px;
+      border-radius: 6px;
+      margin-bottom: 25px;
+      position: relative;
+    }
+    .header-panel h1 {
+      margin: 0 0 10px 0;
+      font-size: 24px;
+    }
+    .logout-btn {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .client-info-grid {
+      background: white;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      margin-bottom: 25px;
+      border-left: 5px solid #02043D;
+    }
+    .client-info-grid h3 {
+      margin-top: 0;
+      color: #02043D;
+    }
+    .info-item {
+      display: inline-block;
+      width: 30%;
+      margin-bottom: 10px;
+      vertical-align: top;
+    }
+    .info-item strong {
+      color: #555;
+      font-size: 13px;
+      display: block;
+    }
+    
+    .section-title {
+      color: #2c3e50;
+      border-bottom: 2px solid #bdc3c7;
+      padding-bottom: 5px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    .table-container {
+      background: white;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      overflow-x: auto;
+      max-height: 350px; 
+      overflow-y: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      font-size: 13px;
+    }
+    th {
+      background-color: #e2e7ef; 
+      color: #032463; 
+      padding: 12px 10px;
+      font-weight: 600;
+      position: sticky;
+      top: 0; 
+      border-bottom: 2px solid #cbd5e1;
+      z-index: 10;
+      vertical-align: middle;
+    }
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #ebeef5;
+      vertical-align: middle;
+    }
+    tr:hover {
+      background-color: #f9fafc;
+    }
+    .empty-row {
+      text-align: center;
+      color: #909399;
+      padding: 20px;
+      font-style: italic;
+    }
+    
+    .status-apto {
+      color: #2e7d32 !important; 
+      font-weight: bold;
+    }
+    .status-condiciones {
+      color: #b7950b !important; 
+      font-weight: bold;
+    }
+    .status-no-apto {
+      color: #c0392b !important; 
+      font-weight: bold;
+    }
+    
+    .loader {
+      display: none;
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #3498db;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Vista de Login -->
+    <div id="loginView" class="view-section active-view">
+      
+      <!-- Lado Izquierdo: Fotos Dinámicas + Texto de Marca Superior -->
+      <div class="login-photo-panel">
+        <div class="brand-logo-left">SMI ARGENTINA</div>
+        <div id="bg1" class="login-bg" style="opacity: 1;"></div>
+        <div id="bg2" class="login-bg" style="opacity: 0;"></div>
+      </div>
+
+      <!-- Lado Derecho: Formulario -->
+      <div class="login-form-panel">
+        <div class="login-form-wrapper">
+          <div class="login-card">
+            <h2>Bienvenidos a Gestión de Inspecciones</h2>
+            <div class="form-group">
+              <label for="txtUsuario">Usuario</label>
+              <input type="text" id="txtUsuario" placeholder="Ingrese su usuario">
+            </div>
+            <div class="form-group">
+              <label for="txtPassword">Contraseña</label>
+              <input type="password" id="txtPassword" placeholder="Ingrese su contraseña">
+            </div>
+            <button class="btn" onclick="ejecutarLogin()">Ingresar al Sistema</button>
+            <div id="loader" class="loader">Verificando credenciales... Buscando registros...</div>
+            <div id="errorMsg" class="error-msg"></div>
+            
+            <!-- Marca de agua al pie de la tarjeta -->
+            <div class="watermark">
+              <strong>SMI ARGENTINA System</strong>
+              comercial@smiargentina.com | +54 9 116654-6569<br>
+              Venezuela 4109, Villa Martelli, Vicente López<br>
+              WWW.SMIARGENTINA.COM
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Vista Dashboard Interna -->
+    <div id="dashboardView" class="view-section">
+      
+      <div class="header-panel">
+        <h1 id="lblNombreEmpresa">Portal del Cliente</h1>
+        <p>Historial completo de Equipos, Inspecciones Técnicas y Obleas Emitidas.</p>
+        <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+      </div>
+      
+      <div class="client-info-grid">
+        <h3>Datos de la Cuenta</h3>
+        <div class="info-item"><strong>ID CLIENTE:</strong> <span id="cliId">-</span></div>
+        <div class="info-item"><strong>RAZÓN SOCIAL / CLIENTE:</strong> <span id="cliNombre">-</span></div>
+        <div class="info-item"><strong>DIRECCIÓN:</strong> <span id="cliDireccion">-</span></div>
+        <div class="info-item"><strong>CONTACTO:</strong> <span id="cliContacto">-</span></div>
+        <div class="info-item"><strong>TELÉFONO:</strong> <span id="cliTelefono">-</span></div>
+        <div class="info-item"><strong>EMAIL:</strong> <span id="cliEmail">-</span></div>
+      </div>
+      
+      <div class="section-title"> Lista de Equipos Registrados</div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID EQUIPO</th>
+              <th>EQUIPO</th>
+              <th>UBICACIÓN</th>
+              <th>CAPACIDAD</th>
+              <th>TIPO</th>
+              <th>ESTADO</th>
+              <th style="text-align: left;">OBSERVACIONES</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyEquipos"></tbody>
+        </table>
+      </div>
+      
+      <div class="section-title"> Historial de Inspecciones</div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID INSP.</th>
+              <th>ID EQUIPO</th>
+              <th>EQUIPO</th>
+              <th>UBICACIÓN</th>
+              <th>CAPACIDAD DE CARGA</th>
+              <th>TIPO INSPECCIÓN</th>
+              <th>FECHA INSP.</th>
+              <th>RESULTADO</th>
+              <th>PRÓXIMA INSPECCION</th>
+              <th>ESTADO</th>
+              <th style="text-align: left;">OBSERVACIONES</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyInspecciones"></tbody>
+        </table>
+      </div>
+      
+      <div class="section-title"> Tabla de Obleas Emitidas</div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>OBLEA N°</th>
+              <th>ID INSPECCIÓN</th>
+              <th>ID EQUIPO</th>
+              <th>EQUIPO</th>
+              <th>FECHA EMISIÓN</th>
+              <th>FECHA VENCIMIENTO</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyObleas"></tbody>
+        </table>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  <script>
+    // URL del Web App de Google Apps Script generado por tu Nueva Implementación (/exec)
+    const WEB_APP_URL = "PEGÁ_ACÁ_TU_URL_DE_EJECUCION_DE_GOOGLE";
+
+    var fotosSlideshow = [
+      "https://lh3.googleusercontent.com/d/1R614UcyKjdMKUW1CD2blQJMfjMEqICzZ",
+      "https://lh3.googleusercontent.com/d/1nCZSjeHawH4dEQCdeLg2GUc2n7Gp3hSL",
+      "https://lh3.googleusercontent.com/d/1IA8tt3sBUcfw3fh9VqkgV_mQaY72JSHE"
+    ];
+    var indexFotoActual = 0;
+
+    function precargarImagenes() {
+      fotosSlideshow.forEach(function(url) {
+        var img = new Image();
+        img.src = url;
+      });
+    }
+
+    function iniciarSlideshow() {
+      var bg1 = document.getElementById("bg1");
+      var bg2 = document.getElementById("bg2");
+      if(!bg1 || !bg2 || fotosSlideshow.length === 0) return;
+      
+      bg1.style.backgroundImage = "url('" + fotosSlideshow[0] + "')";
+      if(fotosSlideshow.length > 1) {
+        bg2.style.backgroundImage = "url('" + fotosSlideshow[1] + "')";
+      }
+      
+      var capaActiva = bg1;
+      var capaOculta = bg2;
+      
+      setInterval(function() {
+        if(fotosSlideshow.length <= 1) return;
+        
+        indexFotoActual = (indexFotoActual + 1) % fotosSlideshow.length;
+        var siguienteIndex = (indexFotoActual + 1) % fotosSlideshow.length;
+        
+        capaActiva.style.opacity = 0;
+        capaOculta.style.opacity = 1;
+        
+        var temporal = capaActiva;
+        capaActiva = capaOculta;
+        capaOculta = temporal;
+        
+        setTimeout(function() {
+          capaOculta.style.backgroundImage = "url('" + fotosSlideshow[siguienteIndex] + "')";
+        }, 1500); 
+        
+      }, 5000); 
+    }
+
+    // MODIFICADO: Ahora ejecuta un fetch HTTP POST a Google Apps Script
+    function ejecutarLogin() {
+      var user = document.getElementById("txtUsuario").value;
+      var pass = document.getElementById("txtPassword").value;
+      var errorDiv = document.getElementById("errorMsg");
+      var loader = document.getElementById("loader");
+      
+      if(!user || !pass) {
+        mostrarError("Por favor complete todos los campos.");
+        return;
+      }
+      
+      errorDiv.style.display = "none";
+      loader.style.display = "block";
+      
+      fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ usuario: user, password: pass })
+      })
+      .then(function(res) {
+        if (!res.ok) throw new Error("Respuesta de red no válida");
+        return res.json();
+      })
+      .then(function(response) {
+        loader.style.display = "none";
+        if(response.success) {
+          renderizarDashboard(response);
+        } else {
+          mostrarError(response.message);
+        }
+      })
+      .catch(function(err) {
+        loader.style.display = "none";
+        mostrarError("Error crítico de conexión: " + err.message);
+      });
+    }
+    
+    function mostrarError(msg) {
+      var errorDiv = document.getElementById("errorMsg");
+      errorDiv.innerText = msg;
+      errorDiv.style.display = "block";
+    }
+    
+    function renderizarDashboard(data) {
+      document.getElementById("loginView").classList.remove("active-view");
+      document.getElementById("dashboardView").classList.add("active-view");
+      
+      document.getElementById("lblNombreEmpresa").innerText = data.datosCliente.CLIENTE || "Portal de Inspección";
+      
+      document.getElementById("cliId").innerText = data.datosCliente.ID_CLIENTE || "N/A";
+      document.getElementById("cliNombre").innerText = data.datosCliente.CLIENTE || "N/A";
+      document.getElementById("cliDireccion").innerText = data.datosCliente.DIRECCIÓN || "N/A";
+      document.getElementById("cliContacto").innerText = data.datosCliente.CONTACTO || "N/A";
+      document.getElementById("cliTelefono").innerText = data.datosCliente.TELEFONO || "N/A";
+      document.getElementById("cliEmail").innerText = data.datosCliente.EMAIL || "N/A";
+      
+      poblarTabla("tbodyEquipos", data.equipos, [
+        "ID_EQUIPO", "EQUIPO", "UBICACIÓN", "CAPACIDAD", "TIPO", "ESTADO", "OBSERVACIÓNES"
+      ]);
+      
+      poblarTabla("tbodyInspecciones", data.inspecciones, [
+        "ID-INSP.", "ID EQUIPO", "EQUIPO", "UBICACIÓN", "CAPACIDAD_TON", "TIPO_INSPECCION", "FECHA_INSPECCION", "RESULTADO", "FECHA_PROXIMA", "ESTADO", "OBSERVACIÓNES"
+      ]);
+      
+      poblarTabla("tbodyObleas", data.obleas, [
+        "OBLEA N°", "ID INSPECCION", "ID EQUIPO", "EQUIPO", "FECHA EMISION", "FECHA VENCIMIENTO"
+      ]);
+    }
+    
+    function poblarTabla(tbodyId, dataArray, keys) {
+      var tbody = document.getElementById(tbodyId);
+      tbody.innerHTML = "";
+      
+      if(!dataArray || dataArray.length === 0) {
+        var tr = document.createElement("tr");
+        var td = document.createElement("td");
+        td.colSpan = keys.length;
+        td.className = "empty-row";
+        td.innerText = "No se encontraron registros asociados para esta sección.";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+      
+      dataArray.forEach(function(item) {
+        var tr = document.createElement("tr");
+        keys.forEach(function(key) {
+          var td = document.createElement("td");
+          var valor = item[key] !== undefined ? item[key] : (item[key.toUpperCase()] !== undefined ? item[key.toUpperCase()] : "");
+          td.innerText = valor;
+          
+          if (key.toUpperCase().includes("OBSERV")) {
+            td.style.textAlign = "left";
+          }
+          
+          var textoLimpio = String(valor).toUpperCase().trim();
+          if (textoLimpio === "APTO") {
+            td.className = "status-apto";
+          } else if (textoLimpio === "APTO CON CONDICION") {
+            td.className = "status-condiciones";
+          } else if (textoLoptio === "NO APTO") {
+            td.className = "status-no-apto";
+          }
+          
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+    
+    function logout() {
+      document.getElementById("txtUsuario").value = "";
+      document.getElementById("txtPassword").value = "";
+      document.getElementById("dashboardView").classList.remove("active-view");
+      document.getElementById("loginView").classList.add("active-view");
+    }
+
+    // Ejecuciones iniciales
+    precargarImagenes();
+    iniciarSlideshow();
+  </script>
+</body>
+</html>
